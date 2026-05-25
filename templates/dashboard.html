@@ -72,7 +72,7 @@
             <div>
                 <div style="font-weight: 600; color: var(--primary);">Auto-Scan Interval</div>
                 <div style="font-size: 0.85rem; color: #4a627a;">
-                    Every <strong>1</strong> minutes
+                    Every <strong>{{ check_interval }}</strong> minutes
                     {% if next_run %}
                     &middot; Next scan: <strong>{{ next_run.strftime('%H:%M') }}</strong>
                     {% endif %}

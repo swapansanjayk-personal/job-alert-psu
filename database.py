@@ -220,11 +220,13 @@ def get_stats():
     notified = conn.execute("SELECT COUNT(*) as c FROM jobs WHERE notified = 1").fetchone()["c"]
     orgs = conn.execute("SELECT COUNT(DISTINCT organization) as c FROM jobs").fetchone()["c"]
     sent = conn.execute("SELECT COUNT(*) as c FROM notification_log WHERE status = 'success'").fetchone()["c"]
+    cfg = conn.execute("SELECT check_interval_minutes FROM config WHERE id = 1").fetchone()
     conn.close()
     return {
         "total_jobs": total_jobs,
         "active_jobs": active_jobs,
         "notified": notified,
         "organizations": orgs,
-        "notifications_sent": sent
+        "notifications_sent": sent,
+        "check_interval": cfg["check_interval_minutes"] if cfg else 120
     }

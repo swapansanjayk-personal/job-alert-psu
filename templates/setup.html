@@ -47,11 +47,11 @@
                                 SMTP (Gmail / Outlook / any email)
                             </option>
                             <option value="mailjet" {% if config.email_provider == 'mailjet' %}selected{% endif %}>
-                                Mailjet API (for Railway / cloud deployment)
+                                Mailjet API (for Render / cloud deployment)
                             </option>
                         </select>
                         <div class="form-text">
-                            Use SMTP for local testing. Use Mailjet when deploying to Railway (free tier blocks SMTP ports).
+                             Use SMTP for local testing. Use Mailjet when deploying to Render (free tier blocks SMTP ports).
                         </div>
                     </div>
 
@@ -136,7 +136,7 @@
                         <div id="mailjet-alert" class="alert alert-info d-flex align-items-center" role="alert" style="display: none;">
                             <div style="font-size: 0.85rem;">
                                 <strong>\U0001f680 Mailjet for Cloud Deployments:</strong>
-                                Railway and other free cloud tiers block SMTP ports (25, 465, 587).
+                                Render and other free cloud tiers block SMTP ports (25, 465, 587).
                                 Mailjet API sends email over HTTPS (port 443), which works everywhere.
                                 <p class="mt-2 mb-0">Free tier: <strong>200 emails/day</strong> — plenty for job alerts.</p>
                             </div>
@@ -168,7 +168,7 @@
                 <li>Set scan interval to <strong>2 minutes</strong> for testing, then increase to 120 for regular use</li>
                 <li>The system automatically skips jobs you've already been notified about</li>
                 <li>You can manually trigger a scan anytime from the Dashboard</li>
-                <li>Use <strong>Mailjet</strong> when deploying to Railway or other cloud platforms</li>
+                <li>Use <strong>Mailjet</strong> when deploying to Render or other cloud platforms</li>
             </ul>
         </div>
     </div>

@@ -100,7 +100,9 @@ def is_psu(job):
 
 
 def filter_job(job):
-    if not is_cse_role(job) and not is_trainee_role(job):
+    if not is_cse_role(job):
+        return False
+    if not is_trainee_role(job):
         return False
     if not is_non_gate(job):
         return False
