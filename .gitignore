@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+
+# Database & config (ephemeral on Koyeb, but exclude from git)
+*.db
+config.json
+
+# OS
+.DS_Store
+Thumbs.db

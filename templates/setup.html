@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Setup - PSU Job Alert System{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        <div class="card-dashboard p-4">
+            <h4 class="fw-bold mb-1" style="color: var(--primary);">\u2699\ufe0f Configuration</h4>
+            <p class="text-muted mb-4" style="font-size: 0.9rem;">
+                Set up your email notification preferences. 
+                The system will scan PSU career pages every N minutes and send you email alerts.
+            </p>
+
+            <form method="POST" action="/setup">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <h6 class="fw-bold" style="color: var(--primary);">\U0001f4ec Email Notification Settings</h6>
+                        <hr class="my-2">
+                    </div>
+
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                            Your Email Address
+                        </label>
+                        <input type="email" name="email_address" class="form-control form-control-lg"
+                               placeholder="you@example.com"
+                               value="{{ config.email_address or '' }}" required>
+                        <div class="form-text">Email where job alerts will be sent</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                            Scan Interval (minutes)
+                        </label>
+                        <input type="number" name="check_interval_minutes" class="form-control form-control-lg"
+                               value="{{ config.check_interval_minutes or 1 }}" min="1" max="1440" required>
+                        <div class="form-text">How often to check for new jobs</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                            SMTP Server
+                        </label>
+                        <input type="text" name="email_smtp_server" class="form-control"
+                               value="{{ config.email_smtp_server or 'smtp.gmail.com' }}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                            SMTP Port
+                        </label>
+                        <input type="number" name="email_smtp_port" class="form-control"
+                               value="{{ config.email_smtp_port or 587 }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                            SMTP Username
+                        </label>
+                        <input type="text" name="email_username" class="form-control"
+                               value="{{ config.email_username or '' }}"
+                               placeholder="you@gmail.com (leave blank to use email above)">
+                        <div class="form-text">Usually your full Gmail/Outlook email address</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                            SMTP Password
+                        </label>
+                        <input type="password" name="email_password" class="form-control"
+                               value="{{ config.email_password or '' }}" required>
+                        <div class="form-text">
+                            Your email account password or SMTP authorization code
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <div style="font-size: 0.85rem;">
+                                <strong>\u26a0\ufe0f Gmail Users \u2014 IMPORTANT:</strong>
+                                Google <strong>blocks regular passwords</strong> for SMTP login.
+                                You MUST use a <strong>Gmail App Password</strong>.
+                                <ol class="mb-0 mt-1" style="font-size: 0.85rem;">
+                                    <li>Go to your
+                                        <a href="https://myaccount.google.com/security" target="_blank">Google Account</a>
+                                        \u2192 Security</li>
+                                    <li>Enable <strong>2-Step Verification</strong> (if not already on)</li>
+                                    <li>Search for <strong>"App Passwords"</strong> in Google Account settings</li>
+                                    <li>Select "Mail" \u2192 "Other" \u2192 name it "PSU Job Alert"</li>
+                                    <li>Copy the <strong>16-character password</strong> and paste in the field above</li>
+                                </ol>
+                                <p class="mt-2 mb-0"><strong>For Outlook/Hotmail/Yahoo:</strong> Use your normal login password.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <hr>
+                        <h6 class="fw-bold" style="color: var(--primary);">WhatsApp Notifications</h6>
+                        <p style="font-size: 0.85rem; color: #4a627a;">
+                            WhatsApp support (via Twilio API) can be added later.
+                            Email notifications are active now.
+                        </p>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-accent btn-lg w-100">
+                            \U0001f4be Save Configuration & Start Monitoring
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-dashboard p-4 mt-4">
+            <h6 class="fw-bold" style="color: var(--primary);">\U0001f4a1 Quick Tips</h6>
+            <ul style="font-size: 0.85rem; color: #4a627a; margin-bottom: 0;">
+                <li>Enter the <strong>same email</strong> in both "Your Email Address" and "SMTP Username" for most providers</li>
+                <li>Set scan interval to <strong>2 minutes</strong> for testing, then increase to 120 for regular use</li>
+                <li>The system automatically skips jobs you've already been notified about</li>
+                <li>You can manually trigger a scan anytime from the Dashboard</li>
+                <li>All data is stored locally in SQLite \u2014 no external database needed</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

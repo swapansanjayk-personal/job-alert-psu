@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - PSU Job Alert System{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="fw-bold" style="color: var(--primary); margin: 0;">
+            \U0001f4ca Job Dashboard
+        </h3>
+        <p class="text-muted" style="font-size: 0.9rem; margin: 4px 0 0 0;">
+            Non-GATE Public Sector jobs for Computer Engineer Trainees
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if not configured %}
+        <a href="/setup" class="btn btn-accent">
+            \u2699\ufe0f Complete Setup
+        </a>
+        {% else %}
+        <form action="/scan" method="POST" style="display: inline;">
+            <button type="submit" class="btn btn-accent">
+                \U0001f50d Scan Now
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+            <div class="stat-number">{{ stats.active_jobs }}</div>
+            <div style="font-size: 0.8rem; color: #4a627a; font-weight: 500;">New Jobs</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+            <div class="stat-number">{{ stats.total_jobs }}</div>
+            <div style="font-size: 0.8rem; color: #4a627a; font-weight: 500;">Total Found</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+            <div class="stat-number">{{ stats.organizations }}</div>
+            <div style="font-size: 0.8rem; color: #4a627a; font-weight: 500;">PSUs Tracked</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+            <div class="stat-number">{{ stats.notifications_sent }}</div>
+            <div style="font-size: 0.8rem; color: #4a627a; font-weight: 500;">Notifications Sent</div>
+        </div>
+    </div>
+</div>
+
+{% if configured %}
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card-dashboard p-3 d-flex align-items-center gap-3">
+            <div style="font-size: 1.5rem;">\U0001f4ec</div>
+            <div>
+                <div style="font-weight: 600; color: var(--primary);">Email Notifications</div>
+                <div style="font-size: 0.85rem; color: #4a627a;">
+                    Sending to <strong>{{ email_address }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card-dashboard p-3 d-flex align-items-center gap-3">
+            <div style="font-size: 1.5rem;">\u23f1\ufe0f</div>
+            <div>
+                <div style="font-weight: 600; color: var(--primary);">Auto-Scan Interval</div>
+                <div style="font-size: 0.85rem; color: #4a627a;">
+                    Every <strong>1</strong> minutes
+                    {% if next_run %}
+                    &middot; Next scan: <strong>{{ next_run.strftime('%H:%M') }}</strong>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-warning d-flex align-items-center" role="alert">
+    \u26a0\ufe0f
+    <div class="ms-2">
+        <strong>Configuration required!</strong>
+        Please <a href="/setup" class="alert-link">complete the setup</a>
+        to enable email notifications and auto-scanning.
+    </div>
+</div>
+{% endif %}
+
+<h5 class="fw-bold mb-3" style="color: var(--primary);">
+    \U0001f4cc Latest Job Openings ({{ jobs|length }})
+</h5>
+
+{% if jobs %}
+<div class="row g-3">
+    {% for job in jobs %}
+    <div class="col-lg-4 col-md-6">
+        <div class="job-card d-flex flex-column">
+            <div class="org-name">{{ job.organization }}</div>
+            <div class="job-title-card">{{ job.title }}</div>
+            <div style="margin: 8px 0;">
+                <span class="detail-tag">\U0001f4cd {{ job.location }}</span>
+                {% if job.deadline %}
+                <span class="detail-tag">\U0001f4c5 {{ job.deadline }}</span>
+                {% endif %}
+                <span class="detail-tag">\U0001f393 {{ job.eligibility[:40] }}{% if job.eligibility|length > 40 %}...{% endif %}</span>
+            </div>
+            <div class="non-gate-tag mb-2">\u2705 No GATE Required</div>
+            <p style="font-size: 0.85rem; color: #2c3e50; flex-grow: 1;">
+                {{ job.description[:100] }}{% if job.description|length > 100 %}...{% endif %}
+            </p>
+            <div class="d-flex justify-content-between align-items-center mt-auto">
+                <span style="font-size: 0.7rem; color: #4a627a;">
+                    {% if job.source == 'seed' %}\U0001f331 Seed{% else %}\U0001f310 Live{% endif %}
+                    {% if job.notified %}\u2705 Notified{% endif %}
+                </span>
+                <a href="{{ job.apply_url }}" target="_blank" class="btn btn-primary-custom btn-sm">
+                    \U0001f517 Apply
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card-dashboard p-5 text-center">
+    <div style="font-size: 3rem; margin-bottom: 12px;">\U0001f50d</div>
+    <h5 style="color: var(--primary);">No jobs found yet</h5>
+    <p class="text-muted">
+        Click <strong>"Scan Now"</strong> to check PSU career pages for the latest opportunities.
+        Seed data will be loaded automatically as fallback.
+    </p>
+</div>
+{% endif %}
+
+{% endblock %}

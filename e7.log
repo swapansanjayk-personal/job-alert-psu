@@ -1,0 +1,9 @@
+2026-05-25 13:17:44,023 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-05-25 13:17:44,033 [INFO] apscheduler.scheduler: Added job "PSU Job Scan" to job store "default"
+2026-05-25 13:17:44,034 [INFO] apscheduler.scheduler: Scheduler started
+2026-05-25 13:17:44,038 [INFO] scheduler: Scheduler started with 1-minute interval
+2026-05-25 13:17:44,062 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.96.71.206:5000
+2026-05-25 13:17:44,063 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
