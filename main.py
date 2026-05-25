@@ -96,6 +96,7 @@ def setup():
         password = request.form.get("email_password", "").strip()
         mailjet_key = request.form.get("mailjet_api_key", "").strip()
         mailjet_secret = request.form.get("mailjet_secret_key", "").strip()
+        resend_key = request.form.get("resend_api_key", "").strip()
         interval = int(request.form.get("check_interval_minutes", 1))
         save_config(
             email_address=email,
@@ -106,6 +107,7 @@ def setup():
             email_password=password,
             mailjet_api_key=mailjet_key,
             mailjet_secret_key=mailjet_secret,
+            resend_api_key=resend_key,
             check_interval_minutes=interval
         )
         update_config(
@@ -117,6 +119,7 @@ def setup():
             email_password=password,
             mailjet_api_key=mailjet_key,
             mailjet_secret_key=mailjet_secret,
+            resend_api_key=resend_key,
             check_interval_minutes=interval
         )
         restart_scheduler(interval)

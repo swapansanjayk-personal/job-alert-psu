@@ -49,9 +49,12 @@
                             <option value="mailjet" {% if config.email_provider == 'mailjet' %}selected{% endif %}>
                                 Mailjet API (for Render / cloud deployment)
                             </option>
+                            <option value="resend" {% if config.email_provider == 'resend' %}selected{% endif %}>
+                                Resend API (simplest — 100/day free)
+                            </option>
                         </select>
                         <div class="form-text">
-                             Use SMTP for local testing. Use Mailjet when deploying to Render (free tier blocks SMTP ports).
+                             Use SMTP for local testing. Use Mailjet or Resend when deploying to Render (free tier blocks SMTP ports).
                         </div>
                     </div>
 
@@ -115,6 +118,18 @@
                         </div>
                     </div>
 
+                    <div id="resend-fields" class="row g-3" style="margin-top: 0; display: none;">
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                Resend API Key
+                            </label>
+                            <input type="password" name="resend_api_key" class="form-control form-control-lg"
+                                   value="{{ config.resend_api_key or '' }}"
+                                   placeholder="re_...">
+                            <div class="form-text">Find in Resend dashboard → API Keys. Starts with <strong>re_</strong></div>
+                        </div>
+                    </div>
+
                     <div class="col-12 mt-4">
                         <div id="smtp-alert" class="alert alert-danger d-flex align-items-center" role="alert">
                             <div style="font-size: 0.85rem;">
@@ -139,6 +154,17 @@
                                 Render and other free cloud tiers block SMTP ports (25, 465, 587).
                                 Mailjet API sends email over HTTPS (port 443), which works everywhere.
                                 <p class="mt-2 mb-0">Free tier: <strong>200 emails/day</strong> — plenty for job alerts.</p>
+                            </div>
+                        </div>
+                        <div id="resend-alert" class="alert alert-info d-flex align-items-center" role="alert" style="display: none;">
+                            <div style="font-size: 0.85rem;">
+                                <strong>\U0001f680 Resend for Cloud Deployments:</strong>
+                                Simplest email API. Free tier: <strong>100 emails/day</strong>.
+                                Works over HTTPS — no SMTP ports needed.
+                                <p class="mt-2 mb-0">
+                                    Sign up at <a href="https://resend.com" target="_blank">resend.com</a> →
+                                    Add Sender → Verify email → Get API Key (starts with re_)
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -168,7 +194,7 @@
                 <li>Set scan interval to <strong>2 minutes</strong> for testing, then increase to 120 for regular use</li>
                 <li>The system automatically skips jobs you've already been notified about</li>
                 <li>You can manually trigger a scan anytime from the Dashboard</li>
-                <li>Use <strong>Mailjet</strong> when deploying to Render or other cloud platforms</li>
+                <li>Use <strong>Mailjet</strong> or <strong>Resend</strong> when deploying to Render (SMTP ports blocked)</li>
             </ul>
         </div>
     </div>
@@ -178,18 +204,18 @@
 function toggleProvider(val) {
     var smtp = document.getElementById('smtp-fields');
     var mj = document.getElementById('mailjet-fields');
+    var re = document.getElementById('resend-fields');
     var smtpAlert = document.getElementById('smtp-alert');
     var mjAlert = document.getElementById('mailjet-alert');
+    var reAlert = document.getElementById('resend-alert');
+    smtp.style.display = 'none'; mj.style.display = 'none'; re.style.display = 'none';
+    smtpAlert.style.display = 'none'; mjAlert.style.display = 'none'; reAlert.style.display = 'none';
     if (val === 'mailjet') {
-        smtp.style.display = 'none';
-        mj.style.display = 'flex';
-        smtpAlert.style.display = 'none';
-        mjAlert.style.display = 'flex';
+        mj.style.display = 'flex'; mjAlert.style.display = 'flex';
+    } else if (val === 'resend') {
+        re.style.display = 'flex'; reAlert.style.display = 'flex';
     } else {
-        smtp.style.display = 'flex';
-        mj.style.display = 'none';
-        smtpAlert.style.display = 'flex';
-        mjAlert.style.display = 'none';
+        smtp.style.display = 'flex'; smtpAlert.style.display = 'flex';
     }
 }
 // Run on page load

@@ -127,6 +127,22 @@ def send_email_notification(jobs, recipient_email=None):
         from_email = config.get("email_username") or config.get("email_address", "")
         return send_email_via_mailjet(api_key, secret_key, from_email, to_email, subject, html_body)
 
+    if provider == "resend":
+        api_key = config.get("resend_api_key", "")
+        if not api_key:
+            return False, "Resend API key not configured"
+        from_email = config.get("email_username") or config.get("email_address", "")
+        url = "https://api.resend.com/emails"
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        payload = {"from": from_email, "to": [to_email], "subject": subject, "html": html_body}
+        resp = requests.post(url, headers=headers, json=payload, timeout=30)
+        if resp.status_code in (200, 201, 202):
+            logger.info(f"Resend email sent to {to_email}")
+            return True, ""
+        body = resp.text[:500]
+        logger.error(f"Resend API error {resp.status_code}: {body}")
+        return False, f"Resend API error {resp.status_code}: {body}"
+
     # SMTP (default)
     smtp_server = config.get("email_smtp_server", "smtp.gmail.com")
     smtp_port = config.get("email_smtp_port", 587)
