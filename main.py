@@ -89,25 +89,31 @@ def setup():
     stats_val = get_stats()
     if request.method == "POST":
         email = request.form.get("email_address", "").strip()
+        provider = request.form.get("email_provider", "smtp").strip()
         smtp_server = request.form.get("email_smtp_server", "smtp.gmail.com").strip()
         smtp_port = int(request.form.get("email_smtp_port", 587))
         username = request.form.get("email_username", "").strip()
         password = request.form.get("email_password", "").strip()
+        sendgrid_key = request.form.get("sendgrid_api_key", "").strip()
         interval = int(request.form.get("check_interval_minutes", 1))
         save_config(
             email_address=email,
+            email_provider=provider,
             email_smtp_server=smtp_server,
             email_smtp_port=smtp_port,
             email_username=username if username else email,
             email_password=password,
+            sendgrid_api_key=sendgrid_key,
             check_interval_minutes=interval
         )
         update_config(
             email_address=email,
+            email_provider=provider,
             email_smtp_server=smtp_server,
             email_smtp_port=smtp_port,
             email_username=username if username else email,
             email_password=password,
+            sendgrid_api_key=sendgrid_key,
             check_interval_minutes=interval
         )
         restart_scheduler(interval)

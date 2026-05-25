@@ -1,9 +1,11 @@
 import smtplib
 import logging
+import json
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 from config import load_config
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +86,27 @@ def build_email_body(jobs):
     return html
 
 
+def send_email_via_sendgrid(api_key, from_email, to_email, subject, html_body):
+    url = "https://api.sendgrid.com/v3/mail/send"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "personalizations": [{"to": [{"email": to_email}]}],
+        "from": {"email": from_email},
+        "subject": subject,
+        "content": [{"type": "text/html", "value": html_body}],
+    }
+    resp = requests.post(url, headers=headers, json=payload, timeout=30)
+    if resp.status_code in (200, 201, 202):
+        logger.info(f"SendGrid email sent to {to_email}")
+        return True, ""
+    body = resp.text[:500]
+    logger.error(f"SendGrid API error {resp.status_code}: {body}")
+    return False, f"SendGrid API error {resp.status_code}: {body}"
+
+
 def send_email_notification(jobs, recipient_email=None):
     config = load_config()
     if recipient_email:
@@ -93,6 +116,19 @@ def send_email_notification(jobs, recipient_email=None):
     if not to_email:
         logger.error("No recipient email configured")
         return False, "No recipient email configured"
+
+    provider = config.get("email_provider", "smtp")
+    html_body = build_email_body(jobs)
+    subject = f"\U0001f4e2 Job Alert: {len(jobs)} New Non-GATE PSU Opportunity/ies Found"
+
+    if provider == "sendgrid":
+        api_key = config.get("sendgrid_api_key", "")
+        if not api_key:
+            return False, "SendGrid API key not configured"
+        from_email = config.get("email_username") or config.get("email_address", "")
+        return send_email_via_sendgrid(api_key, from_email, to_email, subject, html_body)
+
+    # SMTP (default)
     smtp_server = config.get("email_smtp_server", "smtp.gmail.com")
     smtp_port = config.get("email_smtp_port", 587)
     username = config.get("email_username", "")
@@ -102,10 +138,9 @@ def send_email_notification(jobs, recipient_email=None):
         return False, "SMTP credentials not configured"
     try:
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"\U0001f4e2 Job Alert: {len(jobs)} New Non-GATE PSU Opportunity/ies Found"
+        msg["Subject"] = subject
         msg["From"] = username
         msg["To"] = to_email
-        html_body = build_email_body(jobs)
         msg.attach(MIMEText(html_body, "html"))
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()

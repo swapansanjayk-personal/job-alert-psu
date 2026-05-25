@@ -7,7 +7,7 @@
         <div class="card-dashboard p-4">
             <h4 class="fw-bold mb-1" style="color: var(--primary);">\u2699\ufe0f Configuration</h4>
             <p class="text-muted mb-4" style="font-size: 0.9rem;">
-                Set up your email notification preferences. 
+                Set up your email notification preferences.
                 The system will scan PSU career pages every N minutes and send you email alerts.
             </p>
 
@@ -37,45 +37,80 @@
                         <div class="form-text">How often to check for new jobs</div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12">
                         <label class="form-label fw-semibold" style="font-size: 0.9rem;">
-                            SMTP Server
+                            Email Provider
                         </label>
-                        <input type="text" name="email_smtp_server" class="form-control"
-                               value="{{ config.email_smtp_server or 'smtp.gmail.com' }}">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label fw-semibold" style="font-size: 0.9rem;">
-                            SMTP Port
-                        </label>
-                        <input type="number" name="email_smtp_port" class="form-control"
-                               value="{{ config.email_smtp_port or 587 }}">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold" style="font-size: 0.9rem;">
-                            SMTP Username
-                        </label>
-                        <input type="text" name="email_username" class="form-control"
-                               value="{{ config.email_username or '' }}"
-                               placeholder="you@gmail.com (leave blank to use email above)">
-                        <div class="form-text">Usually your full Gmail/Outlook email address</div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold" style="font-size: 0.9rem;">
-                            SMTP Password
-                        </label>
-                        <input type="password" name="email_password" class="form-control"
-                               value="{{ config.email_password or '' }}" required>
+                        <select name="email_provider" class="form-select form-select-lg"
+                                onchange="toggleProvider(this.value)">
+                            <option value="smtp" {% if config.email_provider == 'smtp' %}selected{% endif %}>
+                                SMTP (Gmail / Outlook / any email)
+                            </option>
+                            <option value="sendgrid" {% if config.email_provider == 'sendgrid' %}selected{% endif %}>
+                                SendGrid API (for Render / cloud deployment)
+                            </option>
+                        </select>
                         <div class="form-text">
-                            Your email account password or SMTP authorization code
+                            Use SMTP for local testing. Use SendGrid when deploying to Render (free tier blocks SMTP ports).
+                        </div>
+                    </div>
+
+                    <div id="smtp-fields" class="row g-3" style="margin-top: 0;">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                SMTP Server
+                            </label>
+                            <input type="text" name="email_smtp_server" class="form-control"
+                                   value="{{ config.email_smtp_server or 'smtp.gmail.com' }}">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                SMTP Port
+                            </label>
+                            <input type="number" name="email_smtp_port" class="form-control"
+                                   value="{{ config.email_smtp_port or 587 }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                SMTP Username
+                            </label>
+                            <input type="text" name="email_username" class="form-control"
+                                   value="{{ config.email_username or '' }}"
+                                   placeholder="you@gmail.com (leave blank to use email above)">
+                            <div class="form-text">Usually your full Gmail/Outlook email address</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                SMTP Password / App Password
+                            </label>
+                            <input type="password" name="email_password" class="form-control"
+                                   value="{{ config.email_password or '' }}">
+                            <div class="form-text">
+                                Your email password or Gmail App Password
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="sendgrid-fields" class="row g-3" style="margin-top: 0; display: none;">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                SendGrid API Key
+                            </label>
+                            <input type="password" name="sendgrid_api_key" class="form-control form-control-lg"
+                                   value="{{ config.sendgrid_api_key or '' }}"
+                                   placeholder="SG.xxxxxxxxxxxxxxxxxxxx">
+                            <div class="form-text">
+                                Create a free SendGrid account at https://sendgrid.com, then generate an API key with "Full Access" or "Mail Send" permission.
+                                Free tier: 100 emails/day.
+                            </div>
                         </div>
                     </div>
 
                     <div class="col-12 mt-4">
-                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <div id="smtp-alert" class="alert alert-danger d-flex align-items-center" role="alert">
                             <div style="font-size: 0.85rem;">
                                 <strong>\u26a0\ufe0f Gmail Users \u2014 IMPORTANT:</strong>
                                 Google <strong>blocks regular passwords</strong> for SMTP login.
@@ -90,6 +125,20 @@
                                     <li>Copy the <strong>16-character password</strong> and paste in the field above</li>
                                 </ol>
                                 <p class="mt-2 mb-0"><strong>For Outlook/Hotmail/Yahoo:</strong> Use your normal login password.</p>
+                            </div>
+                        </div>
+                        <div id="sendgrid-alert" class="alert alert-info d-flex align-items-center" role="alert" style="display: none;">
+                            <div style="font-size: 0.85rem;">
+                                <strong>\U0001f680 SendGrid for Cloud Deployments:</strong>
+                                Render, PythonAnywhere, and other free cloud tiers block SMTP ports (25, 465, 587).
+                                SendGrid sends email over HTTPS (port 443), which works everywhere.
+                                <ol class="mb-0 mt-1" style="font-size: 0.85rem;">
+                                    <li>Sign up free at <a href="https://sendgrid.com" target="_blank">sendgrid.com</a></li>
+                                    <li>Go to Settings \u2192 API Keys \u2192 Create API Key</li>
+                                    <li>Select "Full Access" or "Restricted Access" with "Mail Send" permission</li>
+                                    <li>Copy the key (starts with <code>SG.</code>) and paste above</li>
+                                </ol>
+                                <p class="mt-2 mb-0">Free tier: <strong>100 emails/day</strong> — plenty for job alerts.</p>
                             </div>
                         </div>
                     </div>
@@ -119,10 +168,32 @@
                 <li>Set scan interval to <strong>2 minutes</strong> for testing, then increase to 120 for regular use</li>
                 <li>The system automatically skips jobs you've already been notified about</li>
                 <li>You can manually trigger a scan anytime from the Dashboard</li>
-                <li>All data is stored locally in SQLite \u2014 no external database needed</li>
+                <li>Use <strong>SendGrid</strong> when deploying to Render or other cloud platforms</li>
             </ul>
         </div>
     </div>
 </div>
+
+<script>
+function toggleProvider(val) {
+    var smtp = document.getElementById('smtp-fields');
+    var sg = document.getElementById('sendgrid-fields');
+    var smtpAlert = document.getElementById('smtp-alert');
+    var sgAlert = document.getElementById('sendgrid-alert');
+    if (val === 'sendgrid') {
+        smtp.style.display = 'none';
+        sg.style.display = 'flex';
+        smtpAlert.style.display = 'none';
+        sgAlert.style.display = 'flex';
+    } else {
+        smtp.style.display = 'flex';
+        sg.style.display = 'none';
+        smtpAlert.style.display = 'flex';
+        sgAlert.style.display = 'none';
+    }
+}
+// Run on page load
+toggleProvider('{{ config.email_provider or "smtp" }}');
+</script>
 
 {% endblock %}
