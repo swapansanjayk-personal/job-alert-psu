@@ -86,25 +86,23 @@ def build_email_body(jobs):
     return html
 
 
-def send_email_via_sendgrid(api_key, from_email, to_email, subject, html_body):
-    url = "https://api.sendgrid.com/v3/mail/send"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
+def send_email_via_mailjet(api_key, secret_key, from_email, to_email, subject, html_body):
+    url = "https://api.mailjet.com/v3.1/send"
     payload = {
-        "personalizations": [{"to": [{"email": to_email}]}],
-        "from": {"email": from_email},
-        "subject": subject,
-        "content": [{"type": "text/html", "value": html_body}],
+        "Messages": [{
+            "From": {"Email": from_email, "Name": "PSU Job Alert"},
+            "To": [{"Email": to_email}],
+            "Subject": subject,
+            "HTMLPart": html_body,
+        }]
     }
-    resp = requests.post(url, headers=headers, json=payload, timeout=30)
+    resp = requests.post(url, auth=(api_key, secret_key), json=payload, timeout=30)
     if resp.status_code in (200, 201, 202):
-        logger.info(f"SendGrid email sent to {to_email}")
+        logger.info(f"Mailjet email sent to {to_email}")
         return True, ""
     body = resp.text[:500]
-    logger.error(f"SendGrid API error {resp.status_code}: {body}")
-    return False, f"SendGrid API error {resp.status_code}: {body}"
+    logger.error(f"Mailjet API error {resp.status_code}: {body}")
+    return False, f"Mailjet API error {resp.status_code}: {body}"
 
 
 def send_email_notification(jobs, recipient_email=None):
@@ -121,12 +119,13 @@ def send_email_notification(jobs, recipient_email=None):
     html_body = build_email_body(jobs)
     subject = f"\U0001f4e2 Job Alert: {len(jobs)} New Non-GATE PSU Opportunity/ies Found"
 
-    if provider == "sendgrid":
-        api_key = config.get("sendgrid_api_key", "")
-        if not api_key:
-            return False, "SendGrid API key not configured"
+    if provider == "mailjet":
+        api_key = config.get("mailjet_api_key", "")
+        secret_key = config.get("mailjet_secret_key", "")
+        if not api_key or not secret_key:
+            return False, "Mailjet API credentials not configured"
         from_email = config.get("email_username") or config.get("email_address", "")
-        return send_email_via_sendgrid(api_key, from_email, to_email, subject, html_body)
+        return send_email_via_mailjet(api_key, secret_key, from_email, to_email, subject, html_body)
 
     # SMTP (default)
     smtp_server = config.get("email_smtp_server", "smtp.gmail.com")

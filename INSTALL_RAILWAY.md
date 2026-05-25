@@ -6,7 +6,7 @@ Complete step-by-step guide to deploy on Railway's free tier.
 
 Railway's free/Hobby plans **block outbound SMTP ports** (25, 465, 587). You cannot send email directly via Gmail/Outlook SMTP.
 
-**Solution:** The app supports **SendGrid API** which sends email over HTTPS (port 443) — works perfectly on Railway.
+**Solution:** The app supports **Mailjet API** which sends email over HTTPS (port 443) — works perfectly on Railway.
 
 ---
 
@@ -14,32 +14,15 @@ Railway's free/Hobby plans **block outbound SMTP ports** (25, 465, 587). You can
 
 - A **GitHub account** (free — https://github.com)
 - Your project already on GitHub as `swapansanjayk-personal/job-alert-psu`
-- A **SendGrid account** (free — 100 emails/day, https://sendgrid.com)
+- A **Mailjet account** (free — 200 emails/day, https://mailjet.com)
 
 ---
 
-## Step 1: Get a SendGrid API Key
+## Step 1: Get Mailjet API Credentials
 
-1. Go to **https://sendgrid.com** → click **"Sign up"** (use `swapansanjayk@gmail.com`)
-2. Select **"Free Plan"** (100 emails/day, never expires)
-3. Verify your email address
-4. Once logged in:
-   - **Settings** → **API Keys** (left sidebar)
-   - Click **"Create API Key"**
-   - Name: `PSU Job Alert`
-   - Permission: **"Full Access"**
-   - Click **"Create & View"**
-5. **Copy the API key** — it starts with `SG.` (looks like `SG.xxxxxxxxxxxx.xxxxxxxxxxxx`)
-6. Save it somewhere safe (you can't see it again)
-
-## Step 2: Verify Your Sender Email in SendGrid
-
-1. In SendGrid, go to **Settings** → **Sender Authentication**
-2. Click **"Verify a Single Sender"**
-3. Enter:
-   - **Email:** `swapansanjayk@gmail.com`
-   - **Name:** `PSU Job Alert`
-4. Check your Gmail inbox for the verification email → click the link
+1. Go to **https://mailjet.com** and sign in
+2. Go to **Account Settings** → **API Keys** (or **REST API**)
+3. Copy the **API Key** and **Secret Key** — you'll need both for Railway
 
 ---
 
@@ -88,8 +71,9 @@ Railway will automatically:
 
 | Variable | Value |
 |----------|-------|
-| `EMAIL_PROVIDER` | `sendgrid` |
-| `SENDGRID_API_KEY` | *(your SG.xxx key from Step 1)* |
+| `EMAIL_PROVIDER` | `mailjet` |
+| `MAILJET_API_KEY` | *(your Mailjet API Key)* |
+| `MAILJET_SECRET_KEY` | *(your Mailjet Secret Key)* |
 | `SMTP_EMAIL` | `swapansanjayk@gmail.com` |
 | `CHECK_INTERVAL` | `120` |
 
@@ -112,8 +96,8 @@ Railway will automatically:
 1. Open your app URL: `https://job-alert-psu.up.railway.app`
 2. Wait **5-10 seconds** for the scheduler to start
 3. Go to the **Setup** page
-4. You'll see "SendGrid API" pre-selected (from env vars)
-5. Verify the SendGrid API key is present
+4. You'll see "Mailjet API" pre-selected (from env vars)
+5. Verify the Mailjet API Key and Secret Key are present
 6. Click **"Save Configuration & Start Monitoring"**
 7. Go to **Dashboard** and click **"Scan Now"**
 
@@ -178,14 +162,12 @@ Or push to `main` branch — Railway auto-deploys by default.
 - Wait 10 seconds after deploy
 
 ### Email not sending
-- Verify `EMAIL_PROVIDER=sendgrid` env var is set
-- Verify `SENDGRID_API_KEY` is correct (starts with `SG.`)
-- Check SendGrid sender verification is complete (Step 2)
-- Check Railway **Logs** for SendGrid API errors
+- Verify `EMAIL_PROVIDER=mailjet` env var is set
+- Verify `MAILJET_API_KEY` and `MAILJET_SECRET_KEY` are correct
+- Check Railway **Logs** for Mailjet API errors
 
-### SendGrid returns 401 Unauthorized
-- API key may be wrong — regenerate in SendGrid
-- Make sure no extra spaces in the value
+### Mailjet returns 401 Unauthorized
+- API Key or Secret Key may be wrong — copy them again from Mailjet account settings
 
 ### Job scraper finds no jobs
 - Click **"Scan Now"** manually

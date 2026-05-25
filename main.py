@@ -94,7 +94,8 @@ def setup():
         smtp_port = int(request.form.get("email_smtp_port", 587))
         username = request.form.get("email_username", "").strip()
         password = request.form.get("email_password", "").strip()
-        sendgrid_key = request.form.get("sendgrid_api_key", "").strip()
+        mailjet_key = request.form.get("mailjet_api_key", "").strip()
+        mailjet_secret = request.form.get("mailjet_secret_key", "").strip()
         interval = int(request.form.get("check_interval_minutes", 1))
         save_config(
             email_address=email,
@@ -103,7 +104,8 @@ def setup():
             email_smtp_port=smtp_port,
             email_username=username if username else email,
             email_password=password,
-            sendgrid_api_key=sendgrid_key,
+            mailjet_api_key=mailjet_key,
+            mailjet_secret_key=mailjet_secret,
             check_interval_minutes=interval
         )
         update_config(
@@ -113,7 +115,8 @@ def setup():
             email_smtp_port=smtp_port,
             email_username=username if username else email,
             email_password=password,
-            sendgrid_api_key=sendgrid_key,
+            mailjet_api_key=mailjet_key,
+            mailjet_secret_key=mailjet_secret,
             check_interval_minutes=interval
         )
         restart_scheduler(interval)

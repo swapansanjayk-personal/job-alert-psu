@@ -10,7 +10,8 @@ DEFAULT_CONFIG = {
     "email_smtp_port": 587,
     "email_username": "",
     "email_password": "",
-    "sendgrid_api_key": "",
+    "mailjet_api_key": "",
+    "mailjet_secret_key": "",
     "check_interval_minutes": 1,
     "whatsapp_enabled": False,
     "whatsapp_number": "",
@@ -35,7 +36,8 @@ def load_config():
         "email_smtp_port": "SMTP_PORT",
         "email_username": "SMTP_USERNAME",
         "email_password": "SMTP_PASSWORD",
-        "sendgrid_api_key": "SENDGRID_API_KEY",
+        "mailjet_api_key": "MAILJET_API_KEY",
+        "mailjet_secret_key": "MAILJET_SECRET_KEY",
         "check_interval_minutes": "CHECK_INTERVAL",
     }
     for cfg_key, env_var in env_map.items():
@@ -68,8 +70,8 @@ def is_configured():
     if not cfg.get("email_address"):
         return False
     provider = cfg.get("email_provider", "smtp")
-    if provider == "sendgrid":
-        return bool(cfg.get("sendgrid_api_key"))
+    if provider == "mailjet":
+        return bool(cfg.get("mailjet_api_key")) and bool(cfg.get("mailjet_secret_key"))
     return bool(cfg.get("email_password"))
 
 

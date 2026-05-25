@@ -25,7 +25,8 @@ def init_db():
             email_smtp_port INTEGER NOT NULL DEFAULT 587,
             email_username TEXT NOT NULL DEFAULT '',
             email_password TEXT NOT NULL DEFAULT '',
-            sendgrid_api_key TEXT NOT NULL DEFAULT '',
+            mailjet_api_key TEXT NOT NULL DEFAULT '',
+            mailjet_secret_key TEXT NOT NULL DEFAULT '',
             check_interval_minutes INTEGER NOT NULL DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -71,7 +72,8 @@ def init_db():
     """)
     # Migrate old databases: add missing columns
     for col, col_type in [("email_provider", "TEXT NOT NULL DEFAULT 'smtp'"),
-                          ("sendgrid_api_key", "TEXT NOT NULL DEFAULT ''")]:
+                          ("mailjet_api_key", "TEXT NOT NULL DEFAULT ''"),
+                          ("mailjet_secret_key", "TEXT NOT NULL DEFAULT ''")]:
         try:
             conn.execute(f"ALTER TABLE config ADD COLUMN {col} {col_type}")
         except Exception:
@@ -92,7 +94,7 @@ def get_config():
 def update_config(**kwargs):
     allowed = ["email_address", "email_provider", "email_smtp_server",
                "email_smtp_port", "email_username", "email_password",
-               "sendgrid_api_key", "check_interval_minutes"]
+               "mailjet_api_key", "mailjet_secret_key", "check_interval_minutes"]
     sets = []
     values = []
     for key, val in kwargs.items():
